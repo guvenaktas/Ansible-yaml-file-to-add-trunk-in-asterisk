@@ -1,0 +1,31 @@
+---
+- hosts: asterisk
+  tasks:
+  - name: trunk add
+    lineinfile:
+      path: /etc/asterisk/sip.conf
+      state: present
+      line: "{{ item }}"
+    with_items:
+              - '[trunk1003]'
+              - disallow=all
+              - host=192.168.1.22
+              - context=trunk1003
+              - allow=ulaw
+              - nat=force_rport,comedia
+              - canreinvite=yes
+              - insecure=port
+              - dtmfmode=rfc2833
+              - qualify=yes
+              - type=peer
+  - name: sip reload
+    shell: asterisk -rx "sip reload"
+    register: command_output
+  - debug:
+          var: command_output.stdout_lines
+
+  - name: sip show peers
+    shell: asterisk -rx "sip show peers"
+    register: command_output
+  - debug:
+          var: command_output.stdout_lines  
